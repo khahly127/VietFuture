@@ -1,13 +1,122 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  student
+  admin
+}
+
+enum UserStatus {
+  active
+  inactive
+}
+
+model User {
+  user_id       Int        @id @default(autoincrement())
+  full_name     String
+  email         String     @unique
+  password_hash String
+  phone         String?
+  role          UserRole   @default(student)
+  status        UserStatus @default(active)
+  created_at    DateTime   @default(now())
+
+  roadmaps Roadmap[]
+  aiChats  AIChatHistory[]
+}
+
+model Skill {
+  skill_id    Int     @id @default(autoincrement())
+  skill_name  String
+  description String?
+  category    String?
+
+  careerSkills CareerSkill[]
+  courseSkills CourseSkill[]
+}
+
+model CareerPath {
+  career_id    Int     @id @default(autoincrement())
+  career_name  String
+  description  String?
+  salary_range String?
+  demand_level String?
+
+  careerSkills CareerSkill[]
+  roadmaps     Roadmap[]
+}
+
+model CareerSkill {
+  career_skill_id Int     @id @default(autoincrement())
+  career_id       Int
+  skill_id        Int
+  required_level  String?
+
+  career CareerPath @relation(fields: [career_id], references: [career_id])
+  skill  Skill      @relation(fields: [skill_id], references: [skill_id])
+}
+
+model Roadmap {
+  roadmap_id       Int      @id @default(autoincrement())
+  user_id          Int
+  career_id        Int
+  title            String
+  progress_percent Float    @default(0)
+  status           String   @default("active")
+  created_at       DateTime @default(now())
+
+  user   User       @relation(fields: [user_id], references: [user_id])
+  career CareerPath @relation(fields: [career_id], references: [career_id])
+
+  roadmapCourses RoadmapCourse[]
+}
+
+model Course {
+  course_id      Int     @id @default(autoincrement())
+  course_name    String
+  provider       String?
+  description    String?
+  level          String?
+  duration_hours Int?
+  course_url     String?
+
+  roadmapCourses RoadmapCourse[]
+  courseSkills   CourseSkill[]
+}
+
+model RoadmapCourse {
+  roadmap_course_id  Int    @id @default(autoincrement())
+  roadmap_id         Int
+  course_id          Int
+  sequence_order     Int?
+  status             String @default("not_started")
+  completion_percent Float  @default(0)
+
+  roadmap Roadmap @relation(fields: [roadmap_id], references: [roadmap_id])
+  course  Course  @relation(fields: [course_id], references: [course_id])
+}
+
+model CourseSkill {
+  course_skill_id Int @id @default(autoincrement())
+  course_id       Int
+  skill_id        Int
+
+  course Course @relation(fields: [course_id], references: [course_id])
+  skill  Skill  @relation(fields: [skill_id], references: [skill_id])
+}
+
+model AIChatHistory {
+  chat_id    Int      @id @default(autoincrement())
+  user_id    Int
+  question   String
+  answer     String
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [user_id])
 }

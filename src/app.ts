@@ -1,55 +1,54 @@
 import express from "express";
-// import webRoutes from "src/routes/web"; // 🛑 Comment lại vì chưa có file này
-import 'dotenv/config';
-import path from 'path';
-// import initDatabase from "config/seed";   // 🛑 Comment lại
-// import passport from "passport";         // 🛑 Tạm comment cấu hình auth nếu chưa làm đến
-// import { configPassPortLocal } from "./middleware/passport.local"; // 🛑 Comment lại
-// import apiRoutes from "routes/api";       // 🛑 Comment lại
-// import session from "express-session";
-// import { PrismaSessionStore } from '@quixo3/prisma-session-store';
-// import { PrismaClient } from '@prisma/client';
+import cors from "cors";
+import "dotenv/config";
+import userRoutes from "./routes/user.routes";
+import courseRoutes from "./routes/course.routes";
+import roadmapRoutes from "./routes/roadmap.routes";
+import skillRoutes from "./routes/skill.routes";
+import careerPathRoutes from "./routes/careerPath.routes";
+import careerSkillRoutes from "./routes/careerSkill.routes";
+import roadmapCourseRoutes from "./routes/roadmapCourse.routes";
+import courseSkillRoutes from "./routes/courseSkill.routes";
+import aichathistoryRoutes from "./routes/aichathistory.routes";
 
 const app = express();
-const port = process.env.PORT || 3000;
 
-// 1. Cấu hình view engine
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
+// Middleware
+app.use(cors());
 
-// 2. Cấu hình req.body 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// 3. Cấu hình static files
-app.use(express.static('public'));
+app.use(express.urlencoded({
+    extended: true
+}));
 
-// 🛑 Tạm thời comment toàn bộ khối cấu hình Session + Passport cũ 
-// để tránh lỗi khi chưa có bảng Session trong database mới.
-/*
-app.use(session({ ... }));
-app.use(passport.initialize());
-app.use(passport.authenticate('session')); 
-configPassPortLocal();
-*/
+// Routes
+app.use("/api/users", userRoutes);
+app.use("/api/courses", courseRoutes);
+app.use("/api/roadmaps", roadmapRoutes);
+app.use("/api/skills", skillRoutes);
+app.use("/api/careers", careerPathRoutes);
+app.use("/api/career-skills", careerSkillRoutes);
+app.use("/api/roadmap-courses", roadmapCourseRoutes);
+app.use("/api/course-skills", courseSkillRoutes);
+app.use("/api/ai-chat-history", aichathistoryRoutes);
 
-// Test nhanh một route xem app chạy ổn không
+// Health check
 app.get("/", (req, res) => {
-    res.send("Dự án VietFuture đã khởi chạy thành công!");
+    return res.json({
+        message: "VietFuture API running"
+    });
 });
 
-// 6. Cấu hình các routes (Mở ra sau khi bạn đã tạo các file route mới)
-// webRoutes(app);
-// apiRoutes(app);
-
-// 7. Seeding data
-// initDatabase();
-
-// 8. Handle 404 not found
+// 404
 app.use((req, res) => {
-    res.status(404).send("404 not found");
+    return res.status(404).json({
+        message: "Route not found"
+    });
+});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running at port ${PORT}`);
 });
 
-app.listen(port, () => {
-    console.log(`My app is running on port: ${port} `);
-});
+export default app;
