@@ -2,6 +2,13 @@ import { Request, Response, NextFunction } from "express";
 
 import jwt from "jsonwebtoken";
 
+type JwtPayload = {
+    user_id: number;
+    email: string;
+    role: string;
+    [key: string]: any;
+};
+
 export const verifyToken = (
     req: Request,
     res: Response,
@@ -21,7 +28,7 @@ export const verifyToken = (
         const decoded = jwt.verify(
             token,
             process.env.JWT_SECRET!
-        );
+        ) as JwtPayload;
 
         (req as any).user = decoded;
 
@@ -32,3 +39,25 @@ export const verifyToken = (
         });
     }
 };
+
+export const authorizeRoles = (...roles: string[]) => {
+    return (req: Request, res: Response, next: NextFunction) => {
+        const user = (req as any).user as JwtPayload | undefined;
+
+        if (!user) {
+            return res.status(401).json({
+                message: "Unauthorized"
+            });
+        }
+
+        if (!roles.includes(user.role)) {
+            return res.status(403).json({
+                message: "Forbidden: insufficient privileges"
+            });
+        }
+
+        next();
+    };
+};
+
+export const authorizeAdmin = authorizeRoles("admin");

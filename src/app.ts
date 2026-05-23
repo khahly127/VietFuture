@@ -11,6 +11,7 @@ import careerSkillRoutes from "./routes/careerSkill.routes";
 import roadmapCourseRoutes from "./routes/roadmapCourse.routes";
 import courseSkillRoutes from "./routes/courseSkill.routes";
 import aichathistoryRoutes from "./routes/aichathistory.routes";
+import aiRoutes from "./routes/ai.routes";
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use(express.urlencoded({
     extended: true
 }));
 
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
@@ -34,6 +36,7 @@ app.use("/api/career-skills", careerSkillRoutes);
 app.use("/api/roadmap-courses", roadmapCourseRoutes);
 app.use("/api/course-skills", courseSkillRoutes);
 app.use("/api/ai-chat-history", aichathistoryRoutes);
+app.use("/api/ai", aiRoutes);
 
 // Health check
 app.get("/", (req, res) => {
