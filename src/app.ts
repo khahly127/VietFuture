@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import "dotenv/config";
 import userRoutes from "./routes/user.routes";
+import authRoutes from "./routes/auth.routes";
 import courseRoutes from "./routes/course.routes";
 import roadmapRoutes from "./routes/roadmap.routes";
 import skillRoutes from "./routes/skill.routes";
@@ -23,6 +24,7 @@ app.use(express.urlencoded({
 }));
 
 // Routes
+app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/roadmaps", roadmapRoutes);
