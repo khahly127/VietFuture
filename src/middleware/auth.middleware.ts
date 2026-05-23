@@ -1,58 +1,122 @@
-import { Request, Response, NextFunction } from "express";
+import {
+
+    Request,
+    Response,
+    NextFunction
+
+} from "express";
 
 import jwt from "jsonwebtoken";
 
 type JwtPayload = {
+
     user_id: number;
     email: string;
     role: string;
+
     [key: string]: any;
 };
 
 export const verifyToken = (
+
     req: Request,
     res: Response,
     next: NextFunction
-) => {
-    try {
-        const authHeader = req.headers.authorization;
 
+) => {
+
+    try {
+
+        const authHeader =
+            req.headers.authorization;
+
+        // no token
         if (!authHeader) {
+
             return res.status(401).json({
-                message: "No token"
+
+                message:
+                    "No token provided"
             });
         }
 
-        const token = authHeader.split(" ")[1];
+        // wrong format
+        if (
+            !authHeader.startsWith(
+                "Bearer "
+            )
+        ) {
 
-        const decoded = jwt.verify(
-            token,
-            process.env.JWT_SECRET!
-        ) as JwtPayload;
+            return res.status(401).json({
 
-        (req as any).user = decoded;
+                message:
+                    "Invalid token format"
+            });
+        }
+
+        const token =
+            authHeader.split(" ")[1];
+
+        // verify token
+        const decoded =
+            jwt.verify(
+
+                token,
+                process.env.JWT_SECRET!
+
+            ) as JwtPayload;
+
+        // attach user
+        (req as any).user =
+            decoded;
 
         next();
+
     } catch (error) {
+
         return res.status(401).json({
-            message: "Invalid token"
+
+            message:
+                "Invalid or expired token"
         });
     }
 };
 
-export const authorizeRoles = (...roles: string[]) => {
-    return (req: Request, res: Response, next: NextFunction) => {
-        const user = (req as any).user as JwtPayload | undefined;
+export const authorizeRoles = (
+    ...roles: string[]
+) => {
 
+    return (
+
+        req: Request,
+        res: Response,
+        next: NextFunction
+
+    ) => {
+
+        const user = (req as any).user as JwtPayload;
+
+        // chưa login
         if (!user) {
+
             return res.status(401).json({
-                message: "Unauthorized"
+
+                message:
+                    "Unauthorized"
             });
         }
 
-        if (!roles.includes(user.role)) {
+        // không đủ quyền
+        if (
+            !roles.includes(
+                user.role
+            )
+        ) {
+
             return res.status(403).json({
-                message: "Forbidden: insufficient privileges"
+
+                message:
+                    "Forbidden"
             });
         }
 
@@ -60,4 +124,6 @@ export const authorizeRoles = (...roles: string[]) => {
     };
 };
 
-export const authorizeAdmin = authorizeRoles("admin");
+// shortcut
+export const authorizeAdmin =
+    authorizeRoles("admin");

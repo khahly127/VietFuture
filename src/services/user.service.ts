@@ -1,5 +1,5 @@
 import { prisma } from "../config/prisma";
-
+import { hashPassword } from "../utils/hash";
 const getAllUsersService = async () => {
     return await prisma.user.findMany();
 };
@@ -12,9 +12,31 @@ const getUserByIdService = async (id: number) => {
     });
 };
 
-const createUserService = async (data: any) => {
+const createUserService = async (
+    data: any
+) => {
+
+    const hashedPassword =
+        await hashPassword(
+            data.password
+        );
+
     return await prisma.user.create({
-        data
+
+        data: {
+
+            full_name:
+                data.full_name,
+
+            email:
+                data.email,
+
+            password_hash:
+                hashedPassword,
+
+            phone:
+                data.phone
+        }
     });
 };
 

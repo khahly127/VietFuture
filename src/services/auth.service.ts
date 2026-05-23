@@ -2,63 +2,144 @@
 import { hashPassword, comparePassword } from "../utils/hash";
 import { generateToken } from "../utils/jwt";
 
-const getUserByEmail = async (email: string) => {
+const getUserByEmail = async (
+    email: string
+) => {
+
     return await prisma.user.findUnique({
+
         where: {
             email
         }
     });
 };
 
-export const registerService = async (data: any) => {
-    const existing = await getUserByEmail(data.email);
+export const registerService = async (
+    data: any
+) => {
+
+    const existing =
+        await getUserByEmail(
+            data.email
+        );
 
     if (existing) {
-        throw new Error("User with this email already exists");
+
+        throw new Error(
+            "Email already exists"
+        );
     }
 
-    const password_hash = await hashPassword(data.password);
+    // hash password
+    const password_hash =
+        await hashPassword(
+            data.password
+        );
 
-    const user = await prisma.user.create({
-        data: {
-            ...data,
-            password_hash
-        }
-    });
+    // create user
+    const user =
+        await prisma.user.create({
 
+            data: {
+
+                full_name:
+                    data.full_name,
+
+                email:
+                    data.email,
+
+                phone:
+                    data.phone,
+
+                password_hash
+            }
+        });
+
+    // generate jwt
     const token = generateToken({
-        user_id: user.user_id,
-        email: user.email,
-        role: user.role
+
+        user_id:
+            user.user_id,
+
+        email:
+            user.email,
+
+        role:
+            user.role
     });
+
+    // remove password hash
+    const {
+        password_hash: _,
+        ...safeUser
+
+    } = user;
 
     return {
-        user,
+
+        user: safeUser,
         token
     };
 };
 
-export const loginService = async (email: string, password: string) => {
-    const user = await getUserByEmail(email);
+export const loginService = async (
+
+    email: string,
+    password: string
+
+) => {
+
+    const user =
+        await getUserByEmail(
+            email
+        );
 
     if (!user) {
-        throw new Error("Invalid credentials");
+
+        throw new Error(
+            "Invalid credentials"
+        );
     }
 
-    const isValid = await comparePassword(password, user.password_hash);
+    // compare password
+    const isValid =
+        await comparePassword(
+
+            password,
+            user.password_hash
+        );
 
     if (!isValid) {
-        throw new Error("Invalid credentials");
+
+        throw new Error(
+            "Invalid credentials"
+        );
     }
 
-    const token = generateToken({
-        user_id: user.user_id,
-        email: user.email,
-        role: user.role
-    });
+    // generate token
+    const token =
+        generateToken({
+
+            user_id:
+                user.user_id,
+
+            email:
+                user.email,
+
+            role:
+                user.role
+        });
+
+    // remove password hash
+    const {
+        password_hash: _,
+        ...safeUser
+
+    } = user;
 
     return {
-        user,
+
+        user: safeUser,
         token
     };
 };
