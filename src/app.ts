@@ -12,6 +12,13 @@ import roadmapCourseRoutes from "./routes/roadmapCourse.routes";
 import courseSkillRoutes from "./routes/courseSkill.routes";
 import aichathistoryRoutes from "./routes/aichathistory.routes";
 import aiRoutes from "./routes/ai.routes";
+import assessmentRoutes from "./routes/assessment.routes";
+import questionRoutes from "./routes/question.routes";
+import questionOptionRoutes from "./routes/questionOption.routes";
+import assessmentAttemptRoutes from "./routes/assessmentAttempt.routes";
+import userAnswerRoutes from "./routes/userAnswer.routes";
+import skillReportRoutes from "./routes/skillReport.routes";
+import recommendedCourseRoutes from "./routes/recommendedCourse.routes";
 
 const app = express();
 
@@ -37,6 +44,13 @@ app.use("/api/roadmap-courses", roadmapCourseRoutes);
 app.use("/api/course-skills", courseSkillRoutes);
 app.use("/api/ai-chat-history", aichathistoryRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/assessments", assessmentRoutes);
+app.use("/api/questions", questionRoutes);
+app.use("/api/question-options", questionOptionRoutes);
+app.use("/api/assessment-attempts", assessmentAttemptRoutes);
+app.use("/api/user-answers", userAnswerRoutes);
+app.use("/api/skill-reports", skillReportRoutes);
+app.use("/api/recommended-courses", recommendedCourseRoutes);
 
 // Health check
 app.get("/", (req, res) => {
